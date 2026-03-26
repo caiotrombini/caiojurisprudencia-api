@@ -95,6 +95,7 @@ class DataJudProvider(BaseProvider):
                     src.get('tipoDecisao'),
                     nested_get(src, 'documento', 'tipo'),
                     classe,
+                    orgao,
                     ementa,
                     ' '.join(movimentos),
                 )
