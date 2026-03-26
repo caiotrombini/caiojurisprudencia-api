@@ -33,12 +33,15 @@ async def perform_search(
     limite: int,
     api_key: str,
     client_ip: str,
+    tipo_documento: Optional[str] = None,
 ) -> JurisprudenciaResponse:
     tribunais_resolvidos = parse_tribunais(tribunais_raw)
+    tipo_documento_normalizado = tipo_documento.strip().lower() if tipo_documento and tipo_documento.strip() else None
     cache_signature = json.dumps({
         'query': query.strip().lower(),
         'tribunais': tribunais_resolvidos,
         'limite': limite,
+        'tipo_documento': tipo_documento_normalizado,
         'enable_html_connectors': settings.enable_html_connectors,
         'enable_direct_connectors': settings.enable_direct_connectors,
     }, sort_keys=True, ensure_ascii=False)
@@ -49,7 +52,7 @@ async def perform_search(
         return JurisprudenciaResponse.model_validate(cached)
 
     search_id = uuid.uuid4().hex
-    logger.info('[search_id=%s] busca iniciada | api_key=%s | ip=%s | tribunais=%s | limite=%s | query=%r', search_id, _mask_key(api_key), client_ip, tribunais_resolvidos, limite, query)
+    logger.info('[search_id=%s] busca iniciada | api_key=%s | ip=%s | tribunais=%s | limite=%s | tipo_documento=%s | query=%r', search_id, _mask_key(api_key), client_ip, tribunais_resolvidos, limite, tipo_documento_normalizado, query)
     started = time.perf_counter()
     per_tribunal_tasks = [execute_for_tribunal(services, settings, tribunal, query, limite) for tribunal in tribunais_resolvidos]
     executions_nested = await asyncio.gather(*per_tribunal_tasks, return_exceptions=False)
@@ -75,6 +78,8 @@ async def perform_search(
             warnings.append(f"{execution.tribunal}/{execution.provider}: {execution.message}")
 
     unique_results = deduplicate_results(aggregated_results)
+    if tipo_documento_normalizado:
+        unique_results = [item for item in unique_results if (item.tipo_documento or '').lower() == tipo_documento_normalizado]
     elapsed_ms = int((time.perf_counter() - started) * 1000)
     response_model = JurisprudenciaResponse(
         query=query,

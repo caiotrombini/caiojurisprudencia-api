@@ -1,7 +1,8 @@
 from functools import lru_cache
 from typing import Literal
+import json
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,10 +24,44 @@ class Settings(BaseSettings):
     http_max_keepalive_connections: int = Field(default=20, alias='HTTP_MAX_KEEPALIVE_CONNECTIONS')
     default_limit_per_tribunal: int = Field(default=5, alias='DEFAULT_LIMIT_PER_TRIBUNAL')
     max_limit_per_tribunal: int = Field(default=20, alias='MAX_LIMIT_PER_TRIBUNAL')
-    user_agent: str = Field(default='JurisprudenciaAPI/4.0 (+https://example.com/contato)', alias='USER_AGENT')
+    user_agent: str = Field(default='JurisprudenciaAPI/4.1 (+https://example.com/contato)', alias='USER_AGENT')
     enable_html_connectors: bool = Field(default=False, alias='ENABLE_HTML_CONNECTORS')
     enable_direct_connectors: bool = Field(default=True, alias='ENABLE_DIRECT_CONNECTORS')
-    log_level: Literal['CRITICAL','ERROR','WARNING','INFO','DEBUG'] = Field(default='INFO', alias='LOG_LEVEL')
+    log_level: Literal['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'] = Field(default='INFO', alias='LOG_LEVEL')
+
+    @field_validator('api_keys', mode='before')
+    @classmethod
+    def parse_api_keys(cls, value):
+        if isinstance(value, list):
+            return [str(item).strip() for item in value if str(item).strip()]
+        if isinstance(value, str):
+            raw = value.strip()
+            if not raw:
+                return []
+            if raw.startswith('[') and raw.endswith(']'):
+                parsed = json.loads(raw)
+                if not isinstance(parsed, list):
+                    raise ValueError('API_KEYS em JSON deve ser uma lista.')
+                return [str(item).strip() for item in parsed if str(item).strip()]
+            return [item.strip() for item in raw.split(',') if item.strip()]
+        return value
+
+    @field_validator('datajud_token', mode='before')
+    @classmethod
+    def normalize_datajud_token(cls, value):
+        if value is None:
+            return ''
+        raw = str(value).strip()
+        if not raw:
+            return ''
+        return raw if raw.startswith('APIKey ') else f'APIKey {raw}'
+
+    @field_validator('log_level', mode='before')
+    @classmethod
+    def normalize_log_level(cls, value):
+        if value is None:
+            return 'INFO'
+        return str(value).strip().upper()
 
     @property
     def api_keys_set(self) -> set[str]:

@@ -20,6 +20,7 @@ async def search_jurisprudence(
     query: str = Query(..., min_length=2, max_length=300, description='Tema, tese ou expressão de busca.'),
     tribunais: Optional[str] = Query(default='STF,STJ,TST,TJSP,TJRJ', description='Lista separada por vírgula. Aceita grupos: TODOS, SUPERIORES, FEDERAIS, ESTADUAIS, TRABALHISTAS, ELEITORAIS, MILITARES.'),
     limite: int = Query(default=5, ge=1, le=20, description='Quantidade máxima por tribunal.'),
+    tipo_documento: Optional[str] = Query(default=None, description='Filtro opcional. Valores usuais: acordao, decisao_monocratica, sentenca, despacho, processo, movimentacao.'),
     api_key: str = Depends(require_api_key),
     services: ServicesContainer = Depends(get_services),
     settings: Settings = Depends(get_app_settings),
@@ -32,6 +33,7 @@ async def search_jurisprudence(
         query=query,
         tribunais_raw=tribunais,
         limite=limite,
+        tipo_documento=tipo_documento,
         api_key=api_key,
         client_ip=getattr(request.client, 'host', 'unknown'),
     )

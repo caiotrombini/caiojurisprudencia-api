@@ -43,7 +43,7 @@ async def request_upstream(
                 response = await services.http.request(method=method, url=url, params=params, json=json_body, headers=headers)
                 if response.status_code in RETRYABLE_STATUSES:
                     if attempt == settings.http_retries:
-                        logger.warning('[%s] upstream retornou %s em %s', provider, response.status_code, url)
+                        logger.warning('[%s] upstream retornou %s em %s | body=%s', provider, response.status_code, url, response.text[:500])
                         return None
                     retry_after = response.headers.get('Retry-After')
                     await asyncio.sleep(min(int(retry_after), 5) if retry_after and retry_after.isdigit() else (0.35 * attempt) + random.uniform(0.0, 0.15))
@@ -56,7 +56,7 @@ async def request_upstream(
                     return None
                 await asyncio.sleep((0.35 * attempt) + random.uniform(0.0, 0.15))
             except httpx.HTTPStatusError as exc:
-                logger.warning('[%s] HTTP não-retentável %s em %s', provider, exc.response.status_code, url)
+                logger.warning('[%s] HTTP não-retentável %s em %s | body=%s', provider, exc.response.status_code, url, exc.response.text[:500])
                 return None
             except Exception as exc:
                 logger.exception('[%s] erro inesperado em %s: %s', provider, url, exc)

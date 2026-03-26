@@ -18,6 +18,7 @@ class ResultadoJuridico(BaseModel):
     id_resultado: str
     tribunal: str
     numero_processo: Optional[str] = None
+    tipo_documento: Optional[str] = None
     classe_processual: Optional[str] = None
     assunto_principal: Optional[str] = None
     assuntos: list[str] = Field(default_factory=list)

@@ -24,7 +24,7 @@ async def health(services: ServicesContainer = Depends(get_services), settings: 
         status_value = 'degradado'
     return HealthResponse(
         status=status_value,
-        versao='4.0.0',
+        versao='4.1.0',
         redis=redis_status,
         uptime_segundos=round(time.time() - services.started_at, 2),
         tribunais_suportados=len(SUPPORTED_TRIBUNAIS),
