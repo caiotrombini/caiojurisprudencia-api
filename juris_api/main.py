@@ -39,7 +39,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title='Search Jurisprudence API',
+    title='Trombini API para busca de Jurisprudencia',
     version='4.1.0',
     description='API de busca jurisprudencial com prioridade para fontes oficiais, caching em Redis, rate limit distribuído, filtro opcional por tipo documental e resposta jurídica normalizada.',
     lifespan=lifespan,
