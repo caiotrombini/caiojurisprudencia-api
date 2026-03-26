@@ -58,7 +58,7 @@ class TSTDirectProvider(BaseProvider):
                 )
                 fonte = FonteMetadata(nome='TST Jurisprudência', tipo='official_portal', oficial=True, endpoint=url, score_confiabilidade=confidence, observacao='Busca direta no backend público do TST.')
                 results.append(ResultadoJuridico(
-                    id_resultado=result_identifier(tribunal, numero, ementa, fonte.nome), tribunal=tribunal, numero_processo=numero, tipo_documento=infer_document_type(item.get('tipoDocumento'), item.get('tipoDecisao'), classe, ementa), classe_processual=classe, orgao_julgador=orgao, relator=relator, data_julgamento=data_julgamento, ementa=ementa, inteiro_teor_url=inteiro_teor_url, fonte_url='https://jurisprudencia.tst.jus.br/', fonte=fonte, score_relevancia=relevance, score_final=score, metadados={'provider': self.provider_name}
+                    id_resultado=result_identifier(tribunal, numero, ementa, fonte.nome), tribunal=tribunal, numero_processo=numero, tipo_documento=infer_document_type(item.get('tipoDocumento'), item.get('tipoDecisao'), classe, orgao, ementa), classe_processual=classe, orgao_julgador=orgao, relator=relator, data_julgamento=data_julgamento, ementa=ementa, inteiro_teor_url=inteiro_teor_url, fonte_url='https://jurisprudencia.tst.jus.br/', fonte=fonte, score_relevancia=relevance, score_final=score, metadados={'provider': self.provider_name}
                 ))
             return ProviderExecution(tribunal, self.provider_name, results, latency_ms, 'ok' if results else 'vazio', None if results else 'Consulta do TST executada sem resultados.')
         except Exception as exc:
