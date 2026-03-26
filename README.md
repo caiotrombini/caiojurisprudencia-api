@@ -1,4 +1,4 @@
-# Juris API Modular 4.1
+# Trombini API de Busca de Jurisprudencia
 
 API de busca jurisprudencial com prioridade para fontes oficiais, arquitetura modular, cache e rate limit em Redis, `httpx.AsyncClient` compartilhado, controle de concorrência por semáforo, score de confiabilidade por fonte e resposta jurídica normalizada.
 
